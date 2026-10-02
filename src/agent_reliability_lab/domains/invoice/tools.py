@@ -25,5 +25,6 @@ def lookup_receipt(po_id: str) -> Dict[str, Any]:
 
 def calculate_variance(invoice_amount: float, expected_amount: float) -> Dict[str, float]:
     delta = round(invoice_amount - expected_amount, 2)
-    pct = round(delta / expected_amount, 4) if expected_amount else 0.0
+    # 6 places, not 4: at 4 places 10200.01 rounds to exactly 0.02 and slips under the 2% threshold.
+    pct = round(delta / expected_amount, 6) if expected_amount else 0.0
     return {"delta": delta, "pct": pct}
