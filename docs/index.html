@@ -351,6 +351,33 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
     </div>
   </section>
 
+  <section aria-labelledby="ov-conclude">
+    <span class="eyebrow">What the evals say</span>
+    <h2 id="ov-conclude">The model decides how useful the agent is. The design decides how safe it is.</h2>
+    <p>Across scripted agents, two open models and a separately built procurement agent, no unsafe action got through. The models were a different story. Neither one could be trusted to act on its own.</p>
+    <div class="grid">
+      <div class="card"><span class="num">About the models</span>
+        <ul class="plain">
+          <li><strong>Small models fail at the interface before they fail at judgment.</strong> LFM2.5 asked for the right records every time, in its own tool-call syntax. Its 4% is a score for following the reply format, not for its decisions. Test the reply contract on its own before you trust a model's accuracy number.</li>
+          <li><strong>Qwen fails in the dangerous direction.</strong> Its own proposals were right 44% of the time on invoices and 55% on refunds. Nearly every mistake was an approval, including a $1 billion invoice and four cases with planted instructions. A model that leans toward "yes" needs a gate. One that leans toward "no" only needs a human queue.</li>
+          <li><strong>It skips the homework.</strong> Five of the seven good invoices were blocked because Qwen approved before looking up the order and the receipt. The right answer without the evidence still doesn't count.</li>
+          <li><strong>Accuracy alone flatters the wrong agent.</strong> Qwen scored 68% on invoices. Sending every case to a person scores 72%. Read the share of deserved approvals that actually went through: 2 of 7 for Qwen.</li>
+          <li><strong>Neither is ready to work unsupervised.</strong> On a CPU with thinking off, Qwen took about 30 seconds per call and close to an hour for 45 cases. Thinking on, larger models and Claude are the next comparison.</li>
+        </ul>
+      </div>
+      <div class="card"><span class="num">About the agent design</span>
+        <ul class="plain">
+          <li><strong>The checks did the safety work, whatever sat in the seat.</strong> 0 unsafe actions with scripted agents, with Qwen (23 wrong proposals stopped), with LFM and on procurement.</li>
+          <li><strong>The independent recheck carries the most weight.</strong> It was part of nearly every catch on Qwen's invoices. The first version's checks read the rules from the same place as the agent and inherited its mistakes. A checker that shares nothing with the agent is what broke that.</li>
+          <li><strong>Each layer catches its own kind of mistake.</strong> On refunds, red flags caught the account and item rules, the recheck caught the day-31 and over-balance requests, and the scan caught both planted instructions. Take any one out and something gets through.</li>
+          <li><strong>A gate can stop bad actions. It can't create good ones.</strong> The checks never turned a missed approval into an approval. Throughput comes from the model. The design only puts a floor under it.</li>
+          <li><strong>"Release or hold?" is not "is this order right?".</strong> The decision checks caught 0 of 15 wrong suppliers or quantities. A separate plan-content grader caught all 15. Safety and correctness need different checks.</li>
+          <li><strong>Failing closed is safe, but it isn't free.</strong> Every reply LFM got wrong went to a person. That kept money from moving and also left 45 cases for a human. A good adapter is part of the safety design, not a convenience.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <section aria-labelledby="ov-limits">
     <span class="eyebrow">Limits</span>
     <h2 id="ov-limits">What this does not show yet</h2>
