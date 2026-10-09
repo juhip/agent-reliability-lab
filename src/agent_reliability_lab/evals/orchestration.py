@@ -28,7 +28,7 @@ def run_orchestrated(domain: Domain, model: Any, cases: Iterable[Dict[str, Any]]
     box, ledger, approver = build_case_queue(domain, by_id)
     kw = dict(max_steps=max_steps, max_result_chars=limits["max_result_chars"])
     trajectories: List[Trajectory] = []
-    if mode in ("per-case", "per-invoice"):
+    if mode == "per-case":
         for case_id in by_id:
             trajectories.append(Orchestrator(model, box, spec.system, approver, **kw).run(spec.goal_for(case_id)))
     elif mode == "queue":

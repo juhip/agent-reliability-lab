@@ -20,3 +20,5 @@ jobs:
       - run: pytest -q
       - run: python demo.py
       - run: python run_eval.py
+      - run: python run_eval.py --domain refund
+      - run: python run_orchestrator.py --domain refund --out /tmp/orchestration_refund.json

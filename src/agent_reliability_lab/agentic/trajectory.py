@@ -43,7 +43,7 @@ class Trajectory:
         runs = [self] + [d for c in self.children for d in c._flatten()]
         events = [e for r in runs for e in r.events]
         calls = [e for e in events if e.kind == "tool_call"]
-        redundant = 0                     # per agent: two sub-agents each looking up the same PO is not waste
+        redundant = 0                     # per agent: two sub-agents each looking up the same record is not waste
         for r in runs:
             seen = set()
             for e in (x for x in r.events if x.kind == "tool_call"):

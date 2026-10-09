@@ -26,7 +26,7 @@ def main(argv=None) -> int:
     ap.add_argument("--model", choices=["standins", "lmstudio", "claude"], default="standins")
     ap.add_argument("--name", default="local-model", help="model id for lmstudio / claude")
     ap.add_argument("--base-url", default="http://localhost:1234/v1")
-    ap.add_argument("--mode", choices=["per-case", "per-invoice", "queue"], default="per-case")
+    ap.add_argument("--mode", choices=["per-case", "queue"], default="per-case")
     ap.add_argument("--max-steps", type=int, default=None, help="default: the domain's orchestrator_max_steps")
     ap.add_argument("--confirm-spend", action="store_true", help="required for --model claude (real API calls)")
     ap.add_argument("--max-calls", type=int, default=400, help="refuse to start if worst-case model calls exceed this")

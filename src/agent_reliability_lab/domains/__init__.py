@@ -5,6 +5,7 @@ from types import ModuleType
 
 SUITES = {
     "invoice": "agent_reliability_lab.domains.invoice.suite",
+    "refund": "agent_reliability_lab.domains.refund.suite",
 }
 
 

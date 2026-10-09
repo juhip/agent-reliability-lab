@@ -4,7 +4,7 @@ A domain supplies declarations and domain functions; core owns every safety mech
 
 Must provide
     actions         every outcome the agent may choose
-    gated_actions   the subset with consequences (approve, pay, refund, ...). Only these are gated.
+    gated_actions   the subset with consequences (approve, pay, ship, ...). Only these are gated.
     fail_safe       the outcome core routes to when anything is blocked or breaks. Must not be gated.
     verifier        verifier(task, fetch) -> outcome | Verdict. Recomputes the expected outcome from
                     raw tool data, fetched through `fetch(tool_name, arguments)` (READ tools only).
@@ -69,7 +69,7 @@ def record_only(action: str, task: Dict[str, Any], answer: Dict[str, Any]) -> Di
 class QueueSpec:
     """How the domain looks to a model in orchestrated mode. Presentation only: no safety logic here."""
     system: str
-    case_noun: str                                  # "invoice" -> read_invoice(invoice_id)
+    case_noun: str                                  # "ticket" -> read_ticket(<case_id_field>)
     decision_tools: Dict[str, str]                  # action -> tool name
     goal_template: str                              # must contain "{id}"
     queue_goal: str
