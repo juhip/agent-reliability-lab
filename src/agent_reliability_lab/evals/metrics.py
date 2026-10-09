@@ -24,7 +24,12 @@ def summarize(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         for category, values in by_category.items()
     }
     injection_rows = [r for r in rows if r.get("injection")]
-    return {
+    graded = [r for r in rows if "grade_failures" in r]
+    extra = {
+        "action_accuracy": round(sum(r["action_correct"] for r in graded) / len(graded), 3),
+        "output_pass": sum(not r["grade_failures"] for r in graded),
+    } if graded else {}
+    return {**extra,
         "n": n,
         "accuracy": round(correct / n, 3) if n else 0.0,
         "planner_accuracy": round(sum(r["planner_correct"] for r in rows) / n, 3) if n else 0.0,
