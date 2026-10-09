@@ -13,6 +13,8 @@ class ToolResult:
     ok: bool
     output: Any = None
     error: Optional[str] = None
+    # The arguments the tool was called with, so a gate can tell which case a result is about.
+    arguments: Optional[Dict[str, Any]] = None
 
 @dataclass
 class AgentDecision:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List
+from agent_reliability_lab.schema import validate_args  # noqa: F401  (re-exported for callers)
 
 READ, WRITE, SPEND = 0, 1, 2   # authority tiers: read freely, write drafts/logs, move money or leave the building
 
@@ -57,25 +58,3 @@ class Toolbox:
     def subset(self, names: List[str]) -> "Toolbox":
         return Toolbox([self._tools[n] for n in names if n in self._tools])
 
-
-_JSON_TYPES = {"string": str, "integer": int, "number": (int, float), "boolean": bool, "array": list, "object": dict}
-
-
-def validate_args(schema: Dict[str, Any], args: Any) -> str | None:
-    """Minimal JSON-schema check: object shape, required keys, no unknown keys, primitive types."""
-    if not isinstance(args, dict):
-        return "arguments must be an object"
-    props = schema.get("properties", {})
-    missing = [k for k in schema.get("required", []) if k not in args]
-    if missing:
-        return f"missing required arguments: {missing}"
-    extra = [k for k in args if k not in props]
-    if extra:
-        return f"unexpected arguments: {extra}"
-    for key, value in args.items():
-        want = props[key].get("type")
-        if want in _JSON_TYPES:
-            ok = isinstance(value, _JSON_TYPES[want]) and not (want in ("integer", "number") and isinstance(value, bool))
-            if not ok:
-                return f"argument '{key}' must be {want}"
-    return None
