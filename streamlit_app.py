@@ -12,7 +12,7 @@ with left:
     st.subheader("Reference agent: invoice exception handling")
     invoice_id = st.text_input("Invoice ID", "INV-DEMO")
     po_id = st.selectbox("PO", ["PO-1001", "PO-1002", "PO-1003", "PO-9999"])
-    supplier = st.text_input("Supplier", "Apex Components")
+    supplier = st.text_input("Supplier", "Northwind Components")
     amount = st.number_input("Invoice amount", value=10050.0)
     if st.button("Run agent"):
         out = runtime.run({"invoice_id":invoice_id,"po_id":po_id,"supplier":supplier,"invoice_amount":amount})
