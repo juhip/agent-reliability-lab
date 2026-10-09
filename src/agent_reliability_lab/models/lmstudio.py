@@ -35,7 +35,8 @@ class LMStudioDecisionModel(DecisionModel):
         self.actions, self.fail_safe = tuple(actions), fail_safe
         self.base_url = base_url.rstrip("/")
         self.timeout, self.max_retries, self.max_tokens = timeout, max_retries, max_tokens
-        self.stats: Dict[str, Any] = {"calls": 0, "retries": 0, "prompt_tokens": 0, "completion_tokens": 0, "latency_s": []}
+        self.stats: Dict[str, Any] = {"calls": 0, "retries": 0, "prompt_tokens": 0, "completion_tokens": 0, "latency_s": [],
+                                      "errors": []}
 
     def _chat(self, messages: List[Dict[str, str]]) -> str:
         body: Dict[str, Any] = {"model": self.model, "temperature": 0, "max_tokens": self.max_tokens, "messages": messages}
@@ -73,6 +74,8 @@ class LMStudioDecisionModel(DecisionModel):
             except ValueError as exc:
                 last_error = exc
                 self.stats["retries"] += 1
+                if len(self.stats["errors"]) < 5:  # keep a few raw replies so a failed run can be diagnosed
+                    self.stats["errors"].append({"error": str(exc), "reply": text[:400]})
                 messages = messages + [
                     {"role": "assistant", "content": text},
                     {"role": "user", "content": f"That was not usable ({exc}). Reply with ONE JSON object only."},

@@ -1,6 +1,6 @@
 name: open-model-evals
 
-# Free CPU runs of open models (Qwen, gpt-oss, Gemma, Ministral) through both domains, one runner per model, in parallel.
+# Free CPU runs of open models (LFM2.5 vs Qwen3.5) through both domains, one runner per model, in parallel.
 # Each model is served by Ollama's OpenAI-compatible endpoint and driven by the lmstudio planner.
 on:
   push:
@@ -15,18 +15,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - name: lfm2.5-2.6b
+            model: hf.co/LiquidAI/LFM2.5-2.6B-GGUF:Q5_K_M
+            extra: ""
           - name: qwen3.5-9b
             model: hf.co/unsloth/Qwen3.5-9B-GGUF:Q4_K_M
             extra: --reasoning-effort none
-          - name: gpt-oss-20b
-            model: hf.co/ggml-org/gpt-oss-20b-GGUF
-            extra: --reasoning-effort low --max-tokens 1024
-          - name: gemma-4-12b-qat
-            model: hf.co/google/gemma-4-12B-it-qat-q4_0-gguf
-            extra: ""
-          - name: ministral-3-14b
-            model: hf.co/mistralai/Ministral-3-14B-Instruct-2512-GGUF:Q4_K_M
-            extra: ""
     env:
       OLLAMA_CONTEXT_LENGTH: "8192"
     steps:
@@ -38,6 +32,8 @@ jobs:
       - name: Start Ollama and pull model
         run: |
           curl -fsSL https://ollama.com/install.sh | sh
+          # The installer starts a systemd ollama without our env; stop it so this serve owns the port.
+          sudo systemctl stop ollama || true
           (ollama serve > ollama.log 2>&1 &)
           for i in $(seq 1 30); do curl -sf localhost:11434/api/version && break; sleep 2; done
           ollama pull "${{ matrix.model }}"
