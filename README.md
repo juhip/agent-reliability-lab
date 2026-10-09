@@ -89,6 +89,8 @@ pytest -q
 python demo.py
 python run_eval.py [--domain refund]                         # reference planners + baselines
 python run_eval.py --planner lmstudio --model <id>           # a local model served by LM Studio
+pip install -e '.[claude]'                                   # then set ANTHROPIC_API_KEY
+python run_eval.py --planner claude --confirm-spend          # Claude (default claude-opus-5-5); real API calls, costs money
 python run_orchestrator.py [--domain refund] [--mode queue]  # stand-in models, no network
 
 pip install -e '.[demo]' && streamlit run streamlit_app.py   # invoice UI
@@ -123,7 +125,7 @@ src/agent_reliability_lab/
   tool_registry.py, schema.py, policies.py, types.py
   agentic/         orchestrator, generic case queue, stand-in baselines, model adapters
   evals/           runner, metrics, baselines, orchestration eval
-  models/          LM Studio adapter, output parsing
+  models/          LM Studio and Claude adapters, output parsing
   domains/invoice/ domains/refund/
 data/              invoice_cases.jsonl, untrusted_input_cases.jsonl, refund_cases.jsonl
 results/           last orchestrated run per domain

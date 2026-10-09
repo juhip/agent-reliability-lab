@@ -3,6 +3,7 @@
 python run_eval.py                                   # invoice: reference planners + baselines
 python run_eval.py --domain refund
 python run_eval.py --planner lmstudio --model <id> [--base-url http://localhost:1234/v1]
+python run_eval.py --planner claude --confirm-spend [--model claude-opus-5-5] [--effort medium]   # real API; costs money
 
 Exits non-zero if a reference planner's final accuracy drops below 100%, so CI catches regressions.
 """
@@ -23,6 +24,10 @@ def build_planner(suite, name, args):
     baselines = baselines_for(suite.DOMAIN)
     if name in baselines:
         return baselines[name]
+    if name == "claude":
+        from agent_reliability_lab.models.claude import ClaudeDecisionModel
+        return ClaudeDecisionModel(args.model if args.model != "local-model" else "claude-opus-5-5", effort=args.effort,
+                                   actions=tuple(suite.DOMAIN.actions), fail_safe=suite.DOMAIN.fail_safe)
     from agent_reliability_lab.models.lmstudio import LMStudioDecisionModel
     return LMStudioDecisionModel(args.model, args.base_url, actions=tuple(suite.DOMAIN.actions),
                                  fail_safe=suite.DOMAIN.fail_safe)
@@ -31,19 +36,25 @@ def build_planner(suite, name, args):
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--domain", choices=sorted(SUITES), default="invoice")
-    ap.add_argument("--planner", help="a planner from the domain suite, always-escalate, always-approve, or lmstudio")
+    ap.add_argument("--planner", help="a planner from the domain suite, always-escalate, always-approve, lmstudio, or claude")
     ap.add_argument("--model", default="local-model")
     ap.add_argument("--base-url", default="http://localhost:1234/v1")
+    ap.add_argument("--effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"],
+                    help="Claude effort level")
+    ap.add_argument("--confirm-spend", action="store_true", help="required for --planner claude (real API calls)")
     args = ap.parse_args(argv)
 
     suite = load_suite(args.domain)
+    if args.planner == "claude" and not args.confirm_spend:
+        print("Refusing: --planner claude makes real API calls (one or more per case). Add --confirm-spend.")
+        return 2
     names = [args.planner] if args.planner else [*suite.PLANNERS, "always-escalate", "always-approve"]
     cases = [case for path in suite.CASE_FILES for case in load_jsonl(path)]
     reports = {}
     for name in names:
         planner = build_planner(suite, name, args)
         reports[name] = run_cases(build_runtime(suite.DOMAIN, planner), cases)
-        if name == "lmstudio":
+        if name in ("lmstudio", "claude"):
             reports[name]["model_stats"] = planner.stats
 
     print(f"domain={args.domain}, {len(cases)} cases\n")
