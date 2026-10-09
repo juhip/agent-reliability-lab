@@ -29,17 +29,19 @@ class LMStudioDecisionModel(DecisionModel):
 
     def __init__(self, model: str = "local-model", base_url: str = "http://localhost:1234/v1",
                  timeout: float = 120.0, max_retries: int = 1, max_tokens: int = 512,
-                 actions: tuple = ("APPROVE", "HUMAN_REVIEW"), fail_safe: str = "HUMAN_REVIEW") -> None:
-        self.model = model
+                 actions: tuple = ("APPROVE", "HUMAN_REVIEW"), fail_safe: str = "HUMAN_REVIEW",
+                 reasoning_effort: Optional[str] = None) -> None:
+        self.model, self.reasoning_effort = model, reasoning_effort
         self.actions, self.fail_safe = tuple(actions), fail_safe
         self.base_url = base_url.rstrip("/")
         self.timeout, self.max_retries, self.max_tokens = timeout, max_retries, max_tokens
         self.stats: Dict[str, Any] = {"calls": 0, "retries": 0, "prompt_tokens": 0, "completion_tokens": 0, "latency_s": []}
 
     def _chat(self, messages: List[Dict[str, str]]) -> str:
-        payload = json.dumps({
-            "model": self.model, "temperature": 0, "max_tokens": self.max_tokens, "messages": messages,
-        }).encode()
+        body: Dict[str, Any] = {"model": self.model, "temperature": 0, "max_tokens": self.max_tokens, "messages": messages}
+        if self.reasoning_effort:  # thinking models: "none" turns thinking off, "low" keeps it short
+            body["reasoning_effort"] = self.reasoning_effort
+        payload = json.dumps(body).encode()
         req = request.Request(f"{self.base_url}/chat/completions", data=payload,
                               headers={"Content-Type": "application/json"}, method="POST")
         started = time.perf_counter()

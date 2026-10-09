@@ -3,8 +3,6 @@ name: lfm-eval
 # One-off cloud run of LFM2.5-2.6B (Q5_K_M, same build as local LM Studio) through both domains.
 # Serves the model with Ollama's OpenAI-compatible endpoint on the runner's CPU.
 on:
-  push:
-    branches: [lfm-cloud-run]
   workflow_dispatch:
 
 jobs:
