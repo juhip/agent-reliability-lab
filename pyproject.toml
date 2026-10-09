@@ -19,3 +19,5 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src", "."]
+# the vendored example agent keeps its own suite: run it from examples/procurement_agent
+testpaths = ["tests"]

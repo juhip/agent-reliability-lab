@@ -2,6 +2,7 @@
 
 python run_orchestrator.py                         # invoice, stand-in models only (free, no network)
 python run_orchestrator.py --domain refund --mode queue
+python run_orchestrator.py --domain procurement          # stand-ins, per case, both release settings
 python run_orchestrator.py --model lmstudio --name lfm2.5-2.6b
 python run_orchestrator.py --model claude --confirm-spend --max-calls 400   # real API; costs money
 """
@@ -34,6 +35,11 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
 
     suite = load_suite(a.domain)
+    if hasattr(suite, "main"):                   # cases generated at run time: the domain runs its own eval
+        if a.model != "standins" or a.mode != "per-case":
+            print(f"--domain {a.domain} runs the stand-in models per case only.")
+            return 2
+        return suite.main(["--orchestrated-only"] + (["--out", a.out] if a.out else []))
     domain = suite.DOMAIN
     max_steps = a.max_steps or domain.limits["orchestrator_max_steps"]
     cases = [c for p in suite.CASE_FILES for c in load_jsonl(p)]

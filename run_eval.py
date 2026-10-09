@@ -2,6 +2,7 @@
 
 python run_eval.py                                   # invoice: reference planners + baselines
 python run_eval.py --domain refund
+python run_eval.py --domain procurement [--skip-misreadings]   # purchase-order agent in examples/procurement_agent
 python run_eval.py --planner lmstudio --model <id> [--base-url http://localhost:1234/v1] [--reasoning-effort none]
 python run_eval.py --planner claude --confirm-spend [--model claude-opus-5-5] [--effort medium]   # real API; costs money
 
@@ -48,9 +49,16 @@ def main(argv=None) -> int:
     ap.add_argument("--effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"],
                     help="Claude effort level")
     ap.add_argument("--confirm-spend", action="store_true", help="required for --planner claude (real API calls)")
-    args = ap.parse_args(argv)
+    args, rest = ap.parse_known_args(argv)
 
     suite = load_suite(args.domain)
+    if hasattr(suite, "main"):                   # cases generated at run time: the domain runs its own eval
+        if args.planner:
+            print(f"--planner is not supported for --domain {args.domain}; it runs its scripted planners and baselines.")
+            return 2
+        return suite.main(rest)
+    if rest:
+        ap.error(f"unrecognized arguments: {' '.join(rest)}")
     if args.planner == "claude" and not args.confirm_spend:
         print("Refusing: --planner claude makes real API calls (one or more per case). Add --confirm-spend.")
         return 2
