@@ -1,5 +1,7 @@
 # Agent Reliability Lab
 
+**Project page:** https://juhip.github.io/agent-reliability-lab/
+
 A small, reusable framework for building **agents that can be evaluated as systems, not just chatbots**.
 
 Once an LLM can call tools and take actions, model quality is only one source of failure. Reliability also depends on tool selection, argument correctness, deterministic execution, policy compliance, escalation behavior, and end-to-end task success.
