@@ -50,6 +50,7 @@ domain's rules) live under `domains/<name>/queue.py` and `standin.py`.
 ```bash
 python run_orchestrator.py                          # invoice, stand-in models, free
 python run_orchestrator.py --domain refund          # the second domain
+python run_orchestrator.py --domain procurement     # the purchase-order agent (stand-ins, per case)
 python run_orchestrator.py --mode queue             # one parent delegating each case to a sub-agent
 python run_orchestrator.py --model lmstudio --name lfm2.5-2.6b
 python run_orchestrator.py --model claude --confirm-spend --max-calls 800
@@ -65,7 +66,9 @@ python run_orchestrator.py --model claude --confirm-spend --max-calls 800
 | orchestrated, always-escalate | 0.72 | 0.00 | 0 | 0 | 0 |
 
 The refund domain gives the same shape (careful 1.00; always-approve 0.70 with 14 unsafe attempts,
-0 executed, all 20 routed because its required account-status trigger was never resolved).
+0 executed, all 20 routed because its required account-status trigger was never resolved). So does
+procurement: in the agent's least cautious release setting the careful stand-in follows the agent and
+tries to release a hazmat order once; the gate refuses it and routes it to a person (0 executed).
 
 The stand-ins are deterministic code pretending to be a model. They prove the **loop and the gate**:
 a model that approves on sight is refused every time.

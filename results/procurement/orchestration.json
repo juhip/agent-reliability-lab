@@ -1,0 +1,310 @@
+{
+  "actions": [
+    "APPROVE",
+    "HUMAN_REVIEW"
+  ],
+  "cases": {
+    "golden": 17,
+    "untrusted": 10,
+    "golden_labels": {
+      "APPROVE": 13,
+      "HUMAN_REVIEW": 4
+    }
+  },
+  "orchestrated/golden/approve_by_exception": {
+    "careful": {
+      "n": 17,
+      "accuracy": 0.412,
+      "approve_recall": 0.231,
+      "escalation_recall": 1.0,
+      "no_decision": 0,
+      "unsafe_attempts": 0,
+      "unsafe_executed": 0,
+      "routed_by_gate": 0,
+      "steps_per_case": 6.0,
+      "tool_calls": 120,
+      "tool_errors": 0,
+      "redundant_calls": 0,
+      "denied": 0,
+      "subagents": 0,
+      "truncated_results": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "stop_reasons": {
+        "final": 17
+      },
+      "seconds": 0.017,
+      "output_pass": 17
+    },
+    "rubber-stamp": {
+      "n": 17,
+      "accuracy": 0.235,
+      "approve_recall": 0.0,
+      "escalation_recall": 1.0,
+      "no_decision": 0,
+      "unsafe_attempts": 4,
+      "unsafe_executed": 0,
+      "routed_by_gate": 17,
+      "steps_per_case": 3.0,
+      "tool_calls": 17,
+      "tool_errors": 0,
+      "redundant_calls": 0,
+      "denied": 17,
+      "subagents": 0,
+      "truncated_results": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "stop_reasons": {
+        "final": 17
+      },
+      "seconds": 0.014,
+      "output_pass": 0
+    },
+    "always-escalate": {
+      "n": 17,
+      "accuracy": 0.235,
+      "approve_recall": 0.0,
+      "escalation_recall": 1.0,
+      "no_decision": 0,
+      "unsafe_attempts": 0,
+      "unsafe_executed": 0,
+      "routed_by_gate": 0,
+      "steps_per_case": 2.0,
+      "tool_calls": 17,
+      "tool_errors": 0,
+      "redundant_calls": 0,
+      "denied": 0,
+      "subagents": 0,
+      "truncated_results": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "stop_reasons": {
+        "final": 17
+      },
+      "seconds": 0.0,
+      "output_pass": 0
+    }
+  },
+  "orchestrated/untrusted/approve_by_exception": {
+    "careful": {
+      "n": 10,
+      "accuracy": 0.7,
+      "approve_recall": 0.0,
+      "escalation_recall": 1.0,
+      "no_decision": 0,
+      "unsafe_attempts": 0,
+      "unsafe_executed": 0,
+      "routed_by_gate": 0,
+      "steps_per_case": 5.4,
+      "tool_calls": 64,
+      "tool_errors": 4,
+      "redundant_calls": 0,
+      "denied": 0,
+      "subagents": 0,
+      "truncated_results": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "stop_reasons": {
+        "final": 10
+      },
+      "seconds": 0.004,
+      "output_pass": 10
+    },
+    "rubber-stamp": {
+      "n": 10,
+      "accuracy": 0.7,
+      "approve_recall": 0.0,
+      "escalation_recall": 1.0,
+      "no_decision": 0,
+      "unsafe_attempts": 7,
+      "unsafe_executed": 0,
+      "routed_by_gate": 10,
+      "steps_per_case": 3.0,
+      "tool_calls": 10,
+      "tool_errors": 0,
+      "redundant_calls": 0,
+      "denied": 10,
+      "subagents": 0,
+      "truncated_results": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "stop_reasons": {
+        "final": 10
+      },
+      "seconds": 0.007,
+      "output_pass": 2
+    },
+    "always-escalate": {
+      "n": 10,
+      "accuracy": 0.7,
+      "approve_recall": 0.0,
+      "escalation_recall": 1.0,
+      "no_decision": 0,
+      "unsafe_attempts": 0,
+      "unsafe_executed": 0,
+      "routed_by_gate": 0,
+      "steps_per_case": 2.0,
+      "tool_calls": 10,
+      "tool_errors": 0,
+      "redundant_calls": 0,
+      "denied": 0,
+      "subagents": 0,
+      "truncated_results": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "stop_reasons": {
+        "final": 10
+      },
+      "seconds": 0.0,
+      "output_pass": 2
+    }
+  },
+  "orchestrated/golden/policy_thresholds_only": {
+    "careful": {
+      "n": 17,
+      "accuracy": 1.0,
+      "approve_recall": 1.0,
+      "escalation_recall": 1.0,
+      "no_decision": 0,
+      "unsafe_attempts": 1,
+      "unsafe_executed": 0,
+      "routed_by_gate": 1,
+      "steps_per_case": 6.06,
+      "tool_calls": 120,
+      "tool_errors": 0,
+      "redundant_calls": 0,
+      "denied": 1,
+      "subagents": 0,
+      "truncated_results": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "stop_reasons": {
+        "final": 17
+      },
+      "seconds": 0.033,
+      "output_pass": 16
+    },
+    "rubber-stamp": {
+      "n": 17,
+      "accuracy": 0.235,
+      "approve_recall": 0.0,
+      "escalation_recall": 1.0,
+      "no_decision": 0,
+      "unsafe_attempts": 4,
+      "unsafe_executed": 0,
+      "routed_by_gate": 17,
+      "steps_per_case": 3.0,
+      "tool_calls": 17,
+      "tool_errors": 0,
+      "redundant_calls": 0,
+      "denied": 17,
+      "subagents": 0,
+      "truncated_results": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "stop_reasons": {
+        "final": 17
+      },
+      "seconds": 0.013,
+      "output_pass": 0
+    },
+    "always-escalate": {
+      "n": 17,
+      "accuracy": 0.235,
+      "approve_recall": 0.0,
+      "escalation_recall": 1.0,
+      "no_decision": 0,
+      "unsafe_attempts": 0,
+      "unsafe_executed": 0,
+      "routed_by_gate": 0,
+      "steps_per_case": 2.0,
+      "tool_calls": 17,
+      "tool_errors": 0,
+      "redundant_calls": 0,
+      "denied": 0,
+      "subagents": 0,
+      "truncated_results": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "stop_reasons": {
+        "final": 17
+      },
+      "seconds": 0.0,
+      "output_pass": 0
+    }
+  },
+  "orchestrated/untrusted/policy_thresholds_only": {
+    "careful": {
+      "n": 10,
+      "accuracy": 1.0,
+      "approve_recall": 1.0,
+      "escalation_recall": 1.0,
+      "no_decision": 0,
+      "unsafe_attempts": 0,
+      "unsafe_executed": 0,
+      "routed_by_gate": 0,
+      "steps_per_case": 5.4,
+      "tool_calls": 64,
+      "tool_errors": 4,
+      "redundant_calls": 0,
+      "denied": 0,
+      "subagents": 0,
+      "truncated_results": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "stop_reasons": {
+        "final": 10
+      },
+      "seconds": 0.008,
+      "output_pass": 10
+    },
+    "rubber-stamp": {
+      "n": 10,
+      "accuracy": 0.7,
+      "approve_recall": 0.0,
+      "escalation_recall": 1.0,
+      "no_decision": 0,
+      "unsafe_attempts": 7,
+      "unsafe_executed": 0,
+      "routed_by_gate": 10,
+      "steps_per_case": 3.0,
+      "tool_calls": 10,
+      "tool_errors": 0,
+      "redundant_calls": 0,
+      "denied": 10,
+      "subagents": 0,
+      "truncated_results": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "stop_reasons": {
+        "final": 10
+      },
+      "seconds": 0.006,
+      "output_pass": 2
+    },
+    "always-escalate": {
+      "n": 10,
+      "accuracy": 0.7,
+      "approve_recall": 0.0,
+      "escalation_recall": 1.0,
+      "no_decision": 0,
+      "unsafe_attempts": 0,
+      "unsafe_executed": 0,
+      "routed_by_gate": 0,
+      "steps_per_case": 2.0,
+      "tool_calls": 10,
+      "tool_errors": 0,
+      "redundant_calls": 0,
+      "denied": 0,
+      "subagents": 0,
+      "truncated_results": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "stop_reasons": {
+        "final": 10
+      },
+      "seconds": 0.0,
+      "output_pass": 2
+    }
+  }
+}
