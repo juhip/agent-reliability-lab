@@ -15,9 +15,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: lfm2.5-2.6b-native
+          - name: lfm2.5-2.6b
             model: hf.co/LiquidAI/LFM2.5-2.6B-GGUF:Q5_K_M
             extra: --native-tool-calls
+          - name: qwen3.5-9b
+            model: hf.co/unsloth/Qwen3.5-9B-GGUF:Q4_K_M
+            extra: --reasoning-effort none
     env:
       OLLAMA_CONTEXT_LENGTH: "8192"
     steps:
