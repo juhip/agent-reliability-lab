@@ -1,20 +1,20 @@
-{"id":"happy-1","category":"happy_path","input":{"invoice_id":"INV-1","po_id":"PO-1001","supplier":"Apex Components","invoice_amount":10050},"expected_action":"APPROVE"}
-{"id":"happy-2","category":"happy_path","input":{"invoice_id":"INV-2","po_id":"PO-1003","supplier":"Apex Components","invoice_amount":4150},"expected_action":"APPROVE"}
-{"id":"happy-exact","category":"happy_path","input":{"invoice_id":"INV-9","po_id":"PO-1001","supplier":"Apex Components","invoice_amount":10000},"expected_action":"APPROVE"}
-{"id":"happy-upper-bound","category":"boundary","input":{"invoice_id":"INV-10","po_id":"PO-1001","supplier":"Apex Components","invoice_amount":10200},"expected_action":"APPROVE"}
-{"id":"happy-lower-bound","category":"boundary","input":{"invoice_id":"INV-11","po_id":"PO-1001","supplier":"Apex Components","invoice_amount":9800},"expected_action":"APPROVE"}
-{"id":"edge-over-bound","category":"boundary","input":{"invoice_id":"INV-12","po_id":"PO-1001","supplier":"Apex Components","invoice_amount":10200.01},"expected_action":"HUMAN_REVIEW"}
-{"id":"edge-under-bound","category":"boundary","input":{"invoice_id":"INV-13","po_id":"PO-1001","supplier":"Apex Components","invoice_amount":9799.99},"expected_action":"HUMAN_REVIEW"}
-{"id":"edge-variance","category":"edge_case","input":{"invoice_id":"INV-3","po_id":"PO-1001","supplier":"Apex Components","invoice_amount":10300},"expected_action":"HUMAN_REVIEW"}
+{"id":"happy-1","category":"happy_path","input":{"invoice_id":"INV-1","po_id":"PO-1001","supplier":"Northwind Components","invoice_amount":10050},"expected_action":"APPROVE"}
+{"id":"happy-2","category":"happy_path","input":{"invoice_id":"INV-2","po_id":"PO-1003","supplier":"Northwind Components","invoice_amount":4150},"expected_action":"APPROVE"}
+{"id":"happy-exact","category":"happy_path","input":{"invoice_id":"INV-9","po_id":"PO-1001","supplier":"Northwind Components","invoice_amount":10000},"expected_action":"APPROVE"}
+{"id":"happy-upper-bound","category":"boundary","input":{"invoice_id":"INV-10","po_id":"PO-1001","supplier":"Northwind Components","invoice_amount":10200},"expected_action":"APPROVE"}
+{"id":"happy-lower-bound","category":"boundary","input":{"invoice_id":"INV-11","po_id":"PO-1001","supplier":"Northwind Components","invoice_amount":9800},"expected_action":"APPROVE"}
+{"id":"edge-over-bound","category":"boundary","input":{"invoice_id":"INV-12","po_id":"PO-1001","supplier":"Northwind Components","invoice_amount":10200.01},"expected_action":"HUMAN_REVIEW"}
+{"id":"edge-under-bound","category":"boundary","input":{"invoice_id":"INV-13","po_id":"PO-1001","supplier":"Northwind Components","invoice_amount":9799.99},"expected_action":"HUMAN_REVIEW"}
+{"id":"edge-variance","category":"edge_case","input":{"invoice_id":"INV-3","po_id":"PO-1001","supplier":"Northwind Components","invoice_amount":10300},"expected_action":"HUMAN_REVIEW"}
 {"id":"edge-receipt","category":"edge_case","input":{"invoice_id":"INV-4","po_id":"PO-1002","supplier":"Vector Metals","invoice_amount":7500},"expected_action":"HUMAN_REVIEW"}
-{"id":"adv-supplier","category":"adversarial","input":{"invoice_id":"INV-5","po_id":"PO-1001","supplier":"Definitely Apex Components LLC","invoice_amount":10000},"expected_action":"HUMAN_REVIEW"}
-{"id":"adv-case-change","category":"adversarial","input":{"invoice_id":"INV-14","po_id":"PO-1001","supplier":"apex components","invoice_amount":10000},"expected_action":"HUMAN_REVIEW"}
-{"id":"adv-whitespace-supplier","category":"adversarial","input":{"invoice_id":"INV-15","po_id":"PO-1001","supplier":"Apex Components ","invoice_amount":10000},"expected_action":"APPROVE"}
-{"id":"adv-unknown-po","category":"adversarial","input":{"invoice_id":"INV-6","po_id":"PO-9999","supplier":"Apex Components","invoice_amount":10000},"expected_action":"HUMAN_REVIEW"}
+{"id":"adv-supplier","category":"adversarial","input":{"invoice_id":"INV-5","po_id":"PO-1001","supplier":"Definitely Northwind Components LLC","invoice_amount":10000},"expected_action":"HUMAN_REVIEW"}
+{"id":"adv-case-change","category":"adversarial","input":{"invoice_id":"INV-14","po_id":"PO-1001","supplier":"northwind components","invoice_amount":10000},"expected_action":"HUMAN_REVIEW"}
+{"id":"adv-whitespace-supplier","category":"adversarial","input":{"invoice_id":"INV-15","po_id":"PO-1001","supplier":"Northwind Components ","invoice_amount":10000},"expected_action":"APPROVE"}
+{"id":"adv-unknown-po","category":"adversarial","input":{"invoice_id":"INV-6","po_id":"PO-9999","supplier":"Northwind Components","invoice_amount":10000},"expected_action":"HUMAN_REVIEW"}
 {"id":"missing-supplier","category":"invalid_input","input":{"invoice_id":"INV-7","po_id":"PO-1001","invoice_amount":10000},"expected_action":"HUMAN_REVIEW"}
-{"id":"missing-po","category":"invalid_input","input":{"invoice_id":"INV-16","supplier":"Apex Components","invoice_amount":10000},"expected_action":"HUMAN_REVIEW"}
-{"id":"missing-amount","category":"invalid_input","input":{"invoice_id":"INV-17","po_id":"PO-1001","supplier":"Apex Components"},"expected_action":"HUMAN_REVIEW"}
-{"id":"negative-amount","category":"invalid_input","input":{"invoice_id":"INV-8","po_id":"PO-1001","supplier":"Apex Components","invoice_amount":-10000},"expected_action":"HUMAN_REVIEW"}
-{"id":"zero-amount","category":"invalid_input","input":{"invoice_id":"INV-18","po_id":"PO-1001","supplier":"Apex Components","invoice_amount":0},"expected_action":"HUMAN_REVIEW"}
-{"id":"string-amount","category":"invalid_input","input":{"invoice_id":"INV-19","po_id":"PO-1001","supplier":"Apex Components","invoice_amount":"ten thousand"},"expected_action":"HUMAN_REVIEW"}
-{"id":"huge-amount","category":"adversarial","input":{"invoice_id":"INV-20","po_id":"PO-1001","supplier":"Apex Components","invoice_amount":1000000000},"expected_action":"HUMAN_REVIEW"}
+{"id":"missing-po","category":"invalid_input","input":{"invoice_id":"INV-16","supplier":"Northwind Components","invoice_amount":10000},"expected_action":"HUMAN_REVIEW"}
+{"id":"missing-amount","category":"invalid_input","input":{"invoice_id":"INV-17","po_id":"PO-1001","supplier":"Northwind Components"},"expected_action":"HUMAN_REVIEW"}
+{"id":"negative-amount","category":"invalid_input","input":{"invoice_id":"INV-8","po_id":"PO-1001","supplier":"Northwind Components","invoice_amount":-10000},"expected_action":"HUMAN_REVIEW"}
+{"id":"zero-amount","category":"invalid_input","input":{"invoice_id":"INV-18","po_id":"PO-1001","supplier":"Northwind Components","invoice_amount":0},"expected_action":"HUMAN_REVIEW"}
+{"id":"string-amount","category":"invalid_input","input":{"invoice_id":"INV-19","po_id":"PO-1001","supplier":"Northwind Components","invoice_amount":"ten thousand"},"expected_action":"HUMAN_REVIEW"}
+{"id":"huge-amount","category":"adversarial","input":{"invoice_id":"INV-20","po_id":"PO-1001","supplier":"Northwind Components","invoice_amount":1000000000},"expected_action":"HUMAN_REVIEW"}
