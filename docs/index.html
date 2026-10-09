@@ -340,14 +340,14 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
         <tbody>
           <tr><td>Qwen3.5-9B<br><small class="muted">Alibaba</small></td><td class="n">68% (17/25)</td><td class="n">100% (20/20)</td><td class="n">2/7 · 6/6</td><td class="n">14 · 9</td><td class="n">0</td></tr>
           <tr><td>LFM2.5-2.6B, strict reply format<br><small class="muted">Liquid AI</small></td><td class="n">4% (1/25)</td><td class="n">0% (0/20)</td><td class="n">0/7 · 0/6</td><td class="n">–</td><td class="n">0</td></tr>
-          <tr><td>LFM2.5-2.6B, own tool-call format accepted<br><small class="muted">Liquid AI</small></td><td colspan="4"><span class="pill run">Running</span></td><td class="n">–</td></tr>
+          <tr><td>LFM2.5-2.6B, own tool-call format accepted<br><small class="muted">Liquid AI</small></td><td class="n">8% (2/25)</td><td class="n">0% (0/20)</td><td class="n">0/7 · 0/6</td><td class="n">2 · 0</td><td class="n">0</td></tr>
         </tbody>
       </table>
     </div>
     <div class="findings">
       <div class="finding"><span class="n stop">68%</span><p><strong>Qwen approves too readily, and scores below "always ask a person" on invoices (72%).</strong> It proposed approval on 14 invoices that needed a person, including a $1 billion invoice and both hidden-instruction notes. Every one was stopped. It also approved 5 good invoices without looking up the order and receipt first, so the evidence check held those too.</p></div>
       <div class="finding"><span class="n pass">20 / 20</span><p><strong>On refunds, the checks turned 55% right proposals into 100% right outcomes.</strong> The red-flag rules caught the final-sale, large-refund and suspended-account cases, the recheck caught the day-31 and over-balance requests, and the scan caught both hidden instructions.</p></div>
-      <div class="finding"><span class="n stop">4%</span><p><strong>LFM2.5 never got a decision through, because of its reply format.</strong> It asked for the right lookups, but in its own trained tool-call syntax instead of the requested JSON, so every reply was rejected and the case went to a person. That measures format-following, not judgment. A rerun that accepts its native format is in progress.</p></div>
+      <div class="finding"><span class="n stop">8%</span><p><strong>LFM2.5 never got a decision through, and the reasons are about the interface, not its judgment.</strong> It asked for the right lookups in its own tool-call syntax, which the first run rejected (4%). A second run accepted that syntax, and the lookups worked. The final decision still failed: most replies came back empty, and the rest were long rationales cut off by the 512-token reply limit before the JSON closed. The cut-off decisions that were visible looked right. The run took over two hours, at about 3 minutes a case.</p></div>
     </div>
   </section>
 
@@ -358,7 +358,7 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
     <div class="grid">
       <div class="card"><span class="num">About the models</span>
         <ul class="plain">
-          <li><strong>Small models fail at the interface before they fail at judgment.</strong> LFM2.5 asked for the right records every time, in its own tool-call syntax. Its 4% is a score for following the reply format, not for its decisions. Test the reply contract on its own before you trust a model's accuracy number.</li>
+          <li><strong>Small models fail at the interface before they fail at judgment.</strong> LFM2.5 asked for the right records in its own tool-call syntax. Accepting that syntax fixed the lookups, then the final answers broke: empty replies and decisions cut off by the reply-length limit. Its 4% and 8% are scores for the plumbing, not for its decisions. Test the reply contract on its own before you trust a model's accuracy number.</li>
           <li><strong>Qwen fails in the dangerous direction.</strong> Its own proposals were right 44% of the time on invoices and 55% on refunds. Nearly every mistake was an approval, including a $1 billion invoice and four cases with planted instructions. A model that leans toward "yes" needs a gate. One that leans toward "no" only needs a human queue.</li>
           <li><strong>It skips the homework.</strong> Five of the seven good invoices were blocked because Qwen approved before looking up the order and the receipt. The right answer without the evidence still doesn't count.</li>
           <li><strong>Accuracy alone flatters the wrong agent.</strong> Qwen scored 68% on invoices. Sending every case to a person scores 72%. Read the share of deserved approvals that actually went through: 2 of 7 for Qwen.</li>
