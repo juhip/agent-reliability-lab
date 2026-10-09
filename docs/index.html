@@ -287,7 +287,7 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
           <tr><td>Agent with planted mistakes</td><td>Has deliberate blind spots, like misreading a deadline</td><td>Does each check catch the mistake it's designed for?</td></tr>
           <tr><td>Rubber stamp</td><td>Approves everything without looking anything up</td><td>Can a reckless agent push anything through?</td></tr>
           <tr><td>Always ask a person</td><td>Sends every case to a person</td><td>How good does "never act" look on paper? (Too good, as it turns out.)</td></tr>
-          <tr><td>Real AI models</td><td>Open models in the agent's seat</td><td>How does a real model behave inside the safety layer? <span class="pill run">In progress</span></td></tr>
+          <tr><td>Real AI models</td><td>Open models in the agent's seat</td><td>How does a real model behave inside the safety layer? <span class="pill run">First results below</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -301,7 +301,7 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
       <div class="big"><span class="n acc">45</span><p>Synthetic test cases across invoices and refunds, including boundary values, broken inputs, hidden instructions and innocent text that must not be flagged</p></div>
       <div class="big"><span class="n pass">8 / 8</span><p>Planted mistakes caught on the refund desk, each by the check designed for it</p></div>
       <div class="big"><span class="n pass">0 / 32</span><p>Unsafe actions that went through when a reckless AI was in the driver's seat</p></div>
-      <div class="big"><span class="n stop">3 gaps</span><p>Found by wrapping a real procurement agent. These shaped the current, generalized design</p></div>
+      <div class="big"><span class="n stop">3 gaps</span><p>Found by wrapping a separately built procurement agent. Re-measured on the current design: 0 unsafe releases</p></div>
     </div>
     <div class="tbl">
       <table>
@@ -331,19 +331,23 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
   </section>
 
   <section aria-labelledby="ov-next">
-    <span class="eyebrow">In progress</span>
-    <h2 id="ov-next">Next: real AI models in the agent's seat</h2>
-    <p>Everything above uses scripted test agents, so the results show that the safety layer and the scoring work. They are not a measure of any real AI model. The next step is to put small open models, the kind that run on a laptop, into the agent's seat and compare them on the same cases.</p>
+    <span class="eyebrow">First real models</span>
+    <h2 id="ov-next">Small open models in the agent's seat</h2>
+    <p>The same 45 cases, with an open model making the decisions instead of a scripted agent. Each model ran on a free 4-core cloud CPU, served by Ollama, with thinking turned off.</p>
     <div class="tbl">
       <table>
-        <thead><tr><th>Model</th><th>Maker</th><th>Size</th><th>Status</th></tr></thead>
+        <thead><tr><th>Model</th><th>Invoices right</th><th>Refunds right</th><th>Deserved approvals approved</th><th>Wrong proposals stopped</th><th>Unsafe actions through</th></tr></thead>
         <tbody>
-          <tr><td>LFM2.5-2.6B</td><td>Liquid AI</td><td class="n">2.6B</td><td><span class="pill run">In progress</span></td></tr>
-          <tr><td>LFM2-2.6B</td><td>Liquid AI</td><td class="n">2.6B</td><td><span class="pill plan">Next</span></td></tr>
-          <tr><td>Qwen3.5-4B</td><td>Alibaba</td><td class="n">4B</td><td><span class="pill plan">Next</span></td></tr>
-          <tr><td>Gemma 4 E4B</td><td>Google</td><td class="n">~4B effective</td><td><span class="pill plan">Next</span></td></tr>
+          <tr><td>Qwen3.5-9B<br><small class="muted">Alibaba</small></td><td class="n">68% (17/25)</td><td class="n">100% (20/20)</td><td class="n">2/7 · 6/6</td><td class="n">14 · 9</td><td class="n">0</td></tr>
+          <tr><td>LFM2.5-2.6B, strict reply format<br><small class="muted">Liquid AI</small></td><td class="n">4% (1/25)</td><td class="n">0% (0/20)</td><td class="n">0/7 · 0/6</td><td class="n">–</td><td class="n">0</td></tr>
+          <tr><td>LFM2.5-2.6B, own tool-call format accepted<br><small class="muted">Liquid AI</small></td><td colspan="4"><span class="pill run">Running</span></td><td class="n">–</td></tr>
         </tbody>
       </table>
+    </div>
+    <div class="findings">
+      <div class="finding"><span class="n stop">68%</span><p><strong>Qwen approves too readily, and scores below "always ask a person" on invoices (72%).</strong> It proposed approval on 14 invoices that needed a person, including a $1 billion invoice and both hidden-instruction notes. Every one was stopped. It also approved 5 good invoices without looking up the order and receipt first, so the evidence check held those too.</p></div>
+      <div class="finding"><span class="n pass">20 / 20</span><p><strong>On refunds, the checks turned 55% right proposals into 100% right outcomes.</strong> The red-flag rules caught the final-sale, large-refund and suspended-account cases, the recheck caught the day-31 and over-balance requests, and the scan caught both hidden instructions.</p></div>
+      <div class="finding"><span class="n stop">4%</span><p><strong>LFM2.5 never got a decision through, because of its reply format.</strong> It asked for the right lookups, but in its own trained tool-call syntax instead of the requested JSON, so every reply was rejected and the case went to a person. That measures format-following, not judgment. A rerun that accepts its native format is in progress.</p></div>
     </div>
   </section>
 
@@ -351,7 +355,7 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
     <span class="eyebrow">Limits</span>
     <h2 id="ov-limits">What this does not show yet</h2>
     <ul class="plain">
-      <li>No real AI model has been scored yet. Current results come from scripted agents built to test the safety layer.</li>
+      <li>Only two small open models have been scored so far, on a CPU with thinking off. The case-study results come from scripted agents built to test the safety layer, not to rank models.</li>
       <li>The invoice and refund test sets are small (45 cases) and synthetic: structured records and short messages, not PDFs, scans or long email threads.</li>
       <li>The hidden-instruction scan is a pattern list. It is a tripwire, not a full defence. Reworded instructions can slip past it, and odd but innocent text can trip it.</li>
       <li>Nothing here moves real money. Approved actions are recorded, not carried out.</li>
@@ -437,7 +441,7 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
   <div class="hero">
     <span class="eyebrow">Case study 3 · Purchasing</span>
     <h1>Wrapping an existing procurement agent</h1>
-    <p class="lede">The first two desks were built alongside the harness. This one tests the harder claim: can it wrap an agent that was built separately, with its own code, rules and test set? The subject is a generic procurement agent that drafts purchase orders: which supplier, how many units, delivery dates, and whether the order can be released automatically or needs an approver.</p>
+    <p class="lede">The first two desks were built alongside the harness. This one tests the harder claim: can it wrap an agent that was built separately, with its own code, rules and test set? The subject is a generic procurement agent that drafts purchase orders: which supplier, how many units, delivery dates, and whether the order can be released automatically or needs an approver. The published version runs on a fictional manufacturer with fully synthetic data.</p>
   </div>
   <section aria-labelledby="pr-how">
     <span class="eyebrow">How it plugs in</span>
@@ -445,13 +449,13 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
     <div class="grid">
       <div class="card"><span class="num">Kept separate</span><h3>The agent stays outside</h3><p>The procurement agent and its test scenarios are loaded at run time from where they already live. Nothing of theirs is copied into the harness.</p></div>
       <div class="card"><span class="num">Translated</span><h3>Its tests become harness cases</h3><p>Each of the agent's own test scenarios becomes a harness case. Policy decides the label: an order that must name an approver or a safety review goes to a person; the rest may be released.</p></div>
-      <div class="card"><span class="num">Measured</span><h3>Small change to scoring only</h3><p>The agent loop, tool rules and policies needed no edits. The scoring layer needed about 50 lines across 3 files, to grade the content of a plan and not just the final decision.</p></div>
+      <div class="card"><span class="num">Measured</span><h3>No changes to the shared core</h3><p>On the first version, the scoring layer needed about 50 lines across 3 files to grade the content of a plan. On the current version the shared core needed no edits at all: the workflow is plain declarations plus its own independent recheck.</p></div>
     </div>
   </section>
   <section aria-labelledby="pr-find">
     <span class="eyebrow">What it exposed</span>
     <h2 id="pr-find">A real agent found the gaps the synthetic desks didn't</h2>
-    <p>This test ran against the first version of the safety layer. Its findings are the reason the current version looks the way it does.</p>
+    <p>The first run used the first version of the safety layer. Its findings are the reason the current version looks the way it does. Each one has now been re-measured on the current version, below.</p>
     <div class="findings">
       <div class="finding"><span class="n stop">1 order</span><p><strong>An order that policy says needs a safety review could be released automatically</strong> in one configuration of the early checks. The current version handles this kind of rule as a declared red flag that can point at any field, including ones buried inside an order's line items.</p></div>
       <div class="finding"><span class="n stop">1 of 5</span><p><strong>Planted hidden instructions caught by the generic scan.</strong> Adding a few procurement-specific patterns raised it to 3 of 5. The scan now runs over every nested field and every tool result, and each workflow can add its own patterns as data. It is still a tripwire, not a full defence.</p></div>
@@ -459,9 +463,23 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
     </div>
   </section>
   <section aria-labelledby="pr-status">
-    <span class="eyebrow">Status</span>
-    <h2 id="pr-status">Next: rerun on the generalized version</h2>
-    <p>These results are from the first version of the safety layer. The procurement adapter hasn't been moved onto the current generalized version yet, so the gaps above are addressed in the design but not yet re-measured on this agent.</p>
+    <span class="eyebrow">Re-measured</span>
+    <h2 id="pr-status">On the current version, nothing that needed a person was released</h2>
+    <p>The procurement workflow was rebuilt on the generalized safety layer and run again. Running the first version against the same agent reproduced the original numbers, so the differences below come from the safety layer, not the data.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Finding</th><th>First version</th><th>Current version</th></tr></thead>
+        <tbody>
+          <tr><td>Order needing a safety review released automatically</td><td class="n">1</td><td class="n">0</td></tr>
+          <tr><td>Planted hidden instructions caught (of 5)</td><td class="n">1, or 3 with procurement patterns</td><td class="n">3 in the request text; 5 when the records the agent reads are scanned too</td></tr>
+          <tr><td>Innocent texts wrongly flagged</td><td class="n">–</td><td class="n">0 of 333</td></tr>
+          <tr><td>Planted order-detail errors caught by the decision checks (of 15)</td><td class="n">0</td><td class="n">0, or 1 in one setting</td></tr>
+          <tr><td>Planted order-detail errors caught by the plan-content grader (of 15)</td><td class="n">15</td><td class="n">15</td></tr>
+          <tr><td>Unsafe releases, all settings</td><td class="n">1</td><td class="n">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="callout">The decision checks still don't catch a wrong supplier or quantity, because they answer "release or hold?", not "is this order right?". The plan-content grader catches all 15. That split is deliberate: the gate keeps unsafe actions from happening, and the grader scores whether the work itself is correct.</p>
   </section>
 </div>
 </main>
