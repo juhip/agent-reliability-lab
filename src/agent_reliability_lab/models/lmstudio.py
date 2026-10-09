@@ -28,7 +28,7 @@ class LMStudioDecisionModel(DecisionModel):
     `stats` accumulates latency and token usage so a run can report them."""
 
     def __init__(self, model: str = "local-model", base_url: str = "http://localhost:1234/v1",
-                 timeout: float = 120.0, max_retries: int = 1, max_tokens: int = 512,
+                 timeout: float = 120.0, max_retries: int = 1, max_tokens: int = 1024,
                  actions: tuple = ("APPROVE", "HUMAN_REVIEW"), fail_safe: str = "HUMAN_REVIEW",
                  reasoning_effort: Optional[str] = None, native_tool_calls: bool = False) -> None:
         self.model, self.reasoning_effort = model, reasoning_effort
@@ -54,7 +54,21 @@ class LMStudioDecisionModel(DecisionModel):
         usage = body.get("usage") or {}
         self.stats["prompt_tokens"] += usage.get("prompt_tokens", 0)
         self.stats["completion_tokens"] += usage.get("completion_tokens", 0)
-        return body["choices"][0]["message"]["content"]
+        message = body["choices"][0]["message"]
+        content = message.get("content") or ""
+        calls = message.get("tool_calls") or []
+        if not content.strip() and calls:
+            # Some servers (Ollama with LFM) lift tool-call syntax out of the text into tool_calls,
+            # leaving content empty. Turn those into a non-final lookup request in our own format.
+            try:
+                requested = [{"name": c["function"]["name"],
+                              "arguments": c["function"].get("arguments") if isinstance(c["function"].get("arguments"), dict)
+                              else json.loads(c["function"].get("arguments") or "{}")} for c in calls]
+            except (KeyError, TypeError, ValueError):
+                return content
+            self.stats["structured_tool_calls"] = self.stats.get("structured_tool_calls", 0) + 1
+            return json.dumps({"action": self.fail_safe, "rationale": "lookup", "final": False, "tool_calls": requested})
+        return content
 
     def _messages(self, task: Dict[str, Any], tools: Dict[str, Any], observations: List[ToolResult]) -> List[Dict[str, str]]:
         user = json.dumps({"task": task, "observations": [asdict(o) for o in observations]})

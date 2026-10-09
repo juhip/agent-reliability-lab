@@ -91,5 +91,19 @@ def test_reasoning_effort_is_sent_only_when_set(monkeypatch):
     monkeypatch.setattr("agent_reliability_lab.models.lmstudio.request.urlopen", fake_urlopen)
     LMStudioDecisionModel("m")._chat([])
     LMStudioDecisionModel("m", reasoning_effort="none", max_tokens=1024)._chat([])
-    assert "reasoning_effort" not in sent[0] and sent[0]["max_tokens"] == 512
+    assert "reasoning_effort" not in sent[0] and sent[0]["max_tokens"] == 1024
     assert sent[1]["reasoning_effort"] == "none" and sent[1]["max_tokens"] == 1024
+
+
+def test_structured_tool_calls_with_empty_content_become_a_lookup_step(monkeypatch):
+    reply = {"choices": [{"message": {"content": "", "tool_calls": [
+        {"function": {"name": "lookup_po", "arguments": "{\"po_id\": \"PO-1\"}"}}]}}], "usage": {}}
+
+    class Resp:
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def read(self): return json.dumps(reply).encode()
+
+    monkeypatch.setattr("agent_reliability_lab.models.lmstudio.request.urlopen", lambda *a, **k: Resp())
+    d = LMStudioDecisionModel("stub").decide({}, {})
+    assert d.is_final is False and d.action == "HUMAN_REVIEW" and d.tool_calls[0].arguments == {"po_id": "PO-1"}

@@ -41,7 +41,7 @@ def main(argv=None) -> int:
     ap.add_argument("--planner", help="a planner from the domain suite, always-escalate, always-approve, lmstudio, or claude")
     ap.add_argument("--model", default="local-model")
     ap.add_argument("--base-url", default="http://localhost:1234/v1")
-    ap.add_argument("--max-tokens", type=int, default=512, help="lmstudio: reply token cap")
+    ap.add_argument("--max-tokens", type=int, default=1024, help="lmstudio: reply token cap")
     ap.add_argument("--timeout", type=float, default=120.0, help="lmstudio: seconds per model call")
     ap.add_argument("--native-tool-calls", action="store_true",
                     help="lmstudio: also accept the model's own tool-call format (LFM <|tool_call_start|>) for lookups")
