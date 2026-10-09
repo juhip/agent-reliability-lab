@@ -1,0 +1,3 @@
+[submodule "examples/procurement_agent"]
+	path = examples/procurement_agent
+	url = https://github.com/juhip/deterministic-workflow-agent.git

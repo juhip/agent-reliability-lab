@@ -74,7 +74,7 @@ Queue mode (one parent delegating each case to a sub-agent) gives the careful st
 
 ### Case study 3: procurement: `python run_eval.py --domain procurement`
 
-A policy-bound purchase-order agent for a fictional manufacturer, synthetic data. The agent is vendored unchanged in [`examples/procurement_agent/`](examples/procurement_agent/) with its own README and 223 tests; `domains/procurement/` wraps its deterministic stages (load, net requirements, plan a part, hard-rule gate, release check, alerts) as READ tools and declares the rest: triggers (hazardous material, air freight, a blocked or missing hard-rule gate, a line the agent itself holds), procurement screen patterns, invariants that the released plan is exactly the tools' plan and re-passes the agent's rules, and a verifier that re-reads the policy text with its own constants (approved suppliers, catalog and minimum order, the $40,000 approval level, air freight, hazmat) from raw rows. Cases come from the agent's 17-case golden set plus 10 injection, messy and invalid variants, generated at run time. The golden set also grades the written plan (supplier, quantity, dates, wording), so a case is correct only if the action and the plan are right. Labels: release where the policy permits it (13 golden cases), a person where the policy names an approver or a hazmat review (4).
+A policy-bound purchase-order agent for a fictional manufacturer, synthetic data. The agent lives in its own repo, [Deterministic Workflow Agent](https://github.com/juhip/deterministic-workflow-agent), with its own README and 223 tests. It is pulled in as a git submodule at `examples/procurement_agent/` (clone with `--recurse-submodules`, or run `git submodule update --init`); `domains/procurement/` wraps its deterministic stages (load, net requirements, plan a part, hard-rule gate, release check, alerts) as READ tools and declares the rest: triggers (hazardous material, air freight, a blocked or missing hard-rule gate, a line the agent itself holds), procurement screen patterns, invariants that the released plan is exactly the tools' plan and re-passes the agent's rules, and a verifier that re-reads the policy text with its own constants (approved suppliers, catalog and minimum order, the $40,000 approval level, air freight, hazmat) from raw rows. Cases come from the agent's 17-case golden set plus 10 injection, messy and invalid variants, generated at run time. The golden set also grades the written plan (supplier, quantity, dates, wording), so a case is correct only if the action and the plan are right. Labels: release where the policy permits it (13 golden cases), a person where the policy names an approver or a hazmat review (4).
 
 | release setting | planner | accuracy | action accuracy | plans pass golden | escalation recall | released when a person had to decide |
 |---|---|---|---|---|---|---|
@@ -115,7 +115,7 @@ python run_eval.py --planner lmstudio --model <id>           # a local model ser
 pip install -e '.[claude]'                                   # then set ANTHROPIC_API_KEY
 python run_eval.py --planner claude --confirm-spend          # Claude (default claude-opus-5-5); real API calls, costs money
 python run_orchestrator.py [--domain refund] [--mode queue]  # stand-in models, no network
-(cd examples/procurement_agent && python -m pytest -q)        # the vendored agent's own tests
+git submodule update --init                                   # fetch the procurement agent
 
 pip install -e '.[demo]' && streamlit run streamlit_app.py   # invoice UI
 ```
@@ -151,7 +151,7 @@ src/agent_reliability_lab/
   evals/           runner, metrics, baselines, orchestration eval
   models/          LM Studio and Claude adapters, output parsing
   domains/invoice/ domains/refund/ domains/procurement/
-examples/procurement_agent/   the vendored purchase-order agent (synthetic data, own README and tests)
+examples/procurement_agent/   submodule: github.com/juhip/deterministic-workflow-agent
 data/              invoice_cases.jsonl, untrusted_input_cases.jsonl, refund_cases.jsonl
 results/           last orchestrated run per domain; procurement/ for the procurement eval
 ```
