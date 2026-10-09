@@ -1,58 +1,52 @@
-"""Run the eval suite for one or more planners and print a comparison table.
+"""Run the eval suite for one domain's planners plus the two baselines, and print a comparison table.
 
-python run_eval.py                              # reference planners + baselines
+python run_eval.py                                   # invoice: reference planners + baselines
+python run_eval.py --domain refund
 python run_eval.py --planner lmstudio --model <id> [--base-url http://localhost:1234/v1]
 
-Exits non-zero if a reference planner drops below 100%, so CI catches regressions.
+Exits non-zero if a reference planner's final accuracy drops below 100%, so CI catches regressions.
 """
 import argparse
 import sys
-from agent_reliability_lab.domains.invoice.app import build_invoice_runtime
-from agent_reliability_lab.domains.invoice.observing_planner import ObservingInvoicePlanner
-from agent_reliability_lab.domains.invoice.planner import InvoicePlanner
-from agent_reliability_lab.evals.baselines import AlwaysApprove, AlwaysEscalate
+from agent_reliability_lab.domains import SUITES, load_suite
+from agent_reliability_lab.evals.baselines import baselines_for
 from agent_reliability_lab.evals.runner import load_jsonl, run_cases
+from agent_reliability_lab.runtime import build_runtime
 
-DATA = ["data/invoice_cases.jsonl", "data/untrusted_input_cases.jsonl"]
-REFERENCE = {"oneshot", "observing"}
 COLUMNS = ["accuracy", "planner_accuracy", "approve_recall", "escalation_recall",
            "policy_interventions", "system_errors", "followed_injection", "mean_latency_s"]
 
 
-def load_cases():
-    return [case for path in DATA for case in load_jsonl(path)]
-
-
-def build_planner(name, args):
-    if name == "oneshot":
-        return InvoicePlanner()
-    if name == "observing":
-        return ObservingInvoicePlanner()
-    if name == "always-escalate":
-        return AlwaysEscalate()
-    if name == "always-approve":
-        return AlwaysApprove()
+def build_planner(suite, name, args):
+    if name in suite.PLANNERS:
+        return suite.PLANNERS[name]()
+    baselines = baselines_for(suite.DOMAIN)
+    if name in baselines:
+        return baselines[name]
     from agent_reliability_lab.models.lmstudio import LMStudioDecisionModel
-    return LMStudioDecisionModel(args.model, args.base_url)
+    return LMStudioDecisionModel(args.model, args.base_url, actions=tuple(suite.DOMAIN.actions),
+                                 fail_safe=suite.DOMAIN.fail_safe)
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--planner", choices=["oneshot", "observing", "always-escalate", "always-approve", "lmstudio"])
+    ap.add_argument("--domain", choices=sorted(SUITES), default="invoice")
+    ap.add_argument("--planner", help="a planner from the domain suite, always-escalate, always-approve, or lmstudio")
     ap.add_argument("--model", default="local-model")
     ap.add_argument("--base-url", default="http://localhost:1234/v1")
     args = ap.parse_args(argv)
 
-    names = [args.planner] if args.planner else ["oneshot", "observing", "always-escalate", "always-approve"]
-    cases = load_cases()
+    suite = load_suite(args.domain)
+    names = [args.planner] if args.planner else [*suite.PLANNERS, "always-escalate", "always-approve"]
+    cases = [case for path in suite.CASE_FILES for case in load_jsonl(path)]
     reports = {}
     for name in names:
-        planner = build_planner(name, args)
-        reports[name] = run_cases(build_invoice_runtime(planner), cases)
+        planner = build_planner(suite, name, args)
+        reports[name] = run_cases(build_runtime(suite.DOMAIN, planner), cases)
         if name == "lmstudio":
             reports[name]["model_stats"] = planner.stats
 
-    print(f"{len(cases)} cases\n")
+    print(f"domain={args.domain}, {len(cases)} cases\n")
     print(f"{'planner':<16}" + "".join(f"{c[:14]:>16}" for c in COLUMNS))
     for name, rep in reports.items():
         s = rep["summary"]
@@ -63,10 +57,15 @@ def main(argv=None) -> int:
             print(f"\n{name}: {len(misses)} wrong")
             for r in misses:
                 print(f"  {r['id']}: expected {r['expected']}, got {r['actual']} ({r['failure_type']}, {r['escalation_source']})")
+        rescued = [r for r in rep["cases"] if r["correct"] and not r["planner_correct"]]
+        if rescued and name not in ("always-escalate", "always-approve"):
+            print(f"\n{name}: {len(rescued)} planner mistakes caught by the gate")
+            for r in rescued:
+                print(f"  {r['id']}: planner proposed {r['planner_action']}; blocked by {', '.join(r['violations'])}")
         if "model_stats" in reports[name]:
             print(f"\nmodel stats: {reports[name]['model_stats']}")
 
-    failed = [n for n in names if n in REFERENCE and reports[n]["summary"]["accuracy"] < 1.0]
+    failed = [n for n in names if n in suite.REFERENCE and reports[n]["summary"]["accuracy"] < 1.0]
     return 1 if failed else 0
 
 

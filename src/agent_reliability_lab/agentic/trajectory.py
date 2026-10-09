@@ -8,7 +8,7 @@ from agent_reliability_lab.types import ToolResult
 @dataclass
 class Event:
     step: int
-    kind: str            # tool_call | denied | unknown_tool | invalid_args
+    kind: str            # tool_call | denied | gate_passed | unknown_tool | invalid_args
     name: str
     arguments: Dict[str, Any]
     ok: bool = True
@@ -28,10 +28,11 @@ class Trajectory:
     input_tokens: int = 0
     output_tokens: int = 0
     latency_s: float = 0.0
+    truncated: int = 0               # tool results cut down before the model saw them
 
     def tool_results(self) -> List[ToolResult]:
         """Successful and failed tool executions as ToolResults, for invariants to inspect."""
-        return [ToolResult(e.name, e.ok, e.result if e.ok else None, None if e.ok else str(e.result))
+        return [ToolResult(e.name, e.ok, e.result if e.ok else None, None if e.ok else str(e.result), e.arguments)
                 for e in self.events if e.kind == "tool_call"]
 
     def executed(self) -> List[Event]:
@@ -58,6 +59,7 @@ class Trajectory:
             "unknown_tools": sum(e.kind == "unknown_tool" for e in events),
             "invalid_args": sum(e.kind == "invalid_args" for e in events),
             "redundant_calls": redundant,
+            "truncated_results": sum(r.truncated for r in runs),
             "subagents": len(runs) - 1,
             "input_tokens": sum(r.input_tokens for r in runs),
             "output_tokens": sum(r.output_tokens for r in runs),

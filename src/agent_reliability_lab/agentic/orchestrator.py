@@ -1,8 +1,8 @@
 from __future__ import annotations
 import json
 import time
-from dataclasses import dataclass
-from typing import Any, Callable, Dict, List
+from dataclasses import dataclass, field
+from typing import Any, Callable, Dict, List, Optional
 from .trajectory import Event, Trajectory
 from .types import SPEND, ModelTurn, Tool, Toolbox, validate_args
 
@@ -11,6 +11,8 @@ from .types import SPEND, ModelTurn, Tool, Toolbox, validate_args
 class Approval:
     allowed: bool
     reason: str = ""
+    details: Dict[str, Any] = field(default_factory=dict)   # what the gate checked; stored in the trajectory
+    routed_to: Optional[str] = None                         # set when the case was sent to the fail-safe outcome
 
 
 Approver = Callable[[Tool, Dict[str, Any], Trajectory], Approval]
@@ -34,7 +36,7 @@ class Orchestrator:
     """
 
     def __init__(self, model, toolbox: Toolbox, system: str, approver: Approver = deny_all,
-                 max_steps: int = 30, max_total_tokens: int = 400_000, max_result_chars: int = 4000,
+                 max_steps: int = 30, max_total_tokens: int = 400_000, max_result_chars: int = 20_000,
                  allow_delegate: bool = False, child_max_steps: int = 15, depth: int = 0) -> None:
         self.model, self.system, self.approver = model, system, approver
         self.max_steps, self.max_total_tokens, self.max_result_chars = max_steps, max_total_tokens, max_result_chars
@@ -102,7 +104,10 @@ class Orchestrator:
         def reply(content: Any, is_error: bool) -> Dict[str, Any]:
             text = json.dumps(content, default=str)
             if len(text) > self.max_result_chars:
-                text = text[: self.max_result_chars] + '..."(truncated)"'
+                # Only the model's view is cut. The trajectory keeps the full result, and the gate checks that.
+                traj.truncated += 1
+                text = (text[: self.max_result_chars] +
+                        f' ...[truncated: showing {self.max_result_chars} of {len(text)} characters]')
             return {"id": call_id, "name": name, "content": text, "is_error": is_error}
 
         tool = self.toolbox.get(name)
@@ -116,8 +121,12 @@ class Orchestrator:
         if tool.tier >= SPEND:
             verdict = self.approver(tool, args, traj)
             if not verdict.allowed:
-                traj.events.append(Event(step, "denied", name, args, False, note=verdict.reason))
-                return reply({"error": "denied", "reason": verdict.reason}, True)
+                traj.events.append(Event(step, "denied", name, args, False, verdict.details, note=verdict.reason))
+                body = {"error": "denied", "reason": verdict.reason}
+                if verdict.routed_to:
+                    body["routed_to"] = verdict.routed_to
+                return reply(body, True)
+            traj.events.append(Event(step, "gate_passed", name, args, True, verdict.details, note=verdict.reason))
         try:
             result = tool.handler(**args)
             traj.events.append(Event(step, "tool_call", name, args, True, result))

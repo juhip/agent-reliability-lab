@@ -69,8 +69,11 @@ def test_invariant_catches_fabricated_variance():
             ToolCall("calculate_variance", {"invoice_amount": 10000.0, "expected_amount": 10000.0}),  # not the real invoice amount
         ])
     out = build_invoice_runtime(planner).run(dict(BASE, invoice_amount=12500))
-    assert out["status"] == "HUMAN_REVIEW" and out["escalation_source"] == "policy_invariant"
-    assert "approve_variance_not_computed_from_invoice" in out["violations"]
+    assert out["status"] == "HUMAN_REVIEW" and out["escalation_source"] == "gate"
+    # The variance call was made with another amount, so evidence scoping does not count it for this
+    # invoice; and the verifier, recomputing from the raw records, disagrees on its own.
+    assert "approve_without_verified_three_way_match" in out["violations"]
+    assert "verifier_disagrees:HUMAN_REVIEW" in out["violations"]
 
 
 def test_flagged_input_blocks_approval_even_when_numbers_check_out():
