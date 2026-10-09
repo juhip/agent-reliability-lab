@@ -1,0 +1,72 @@
+name: open-model-evals
+
+# Free CPU runs of open models (LFM2.5 vs Qwen3.5) through both domains, one runner per model, in parallel.
+# Each model is served by Ollama's OpenAI-compatible endpoint and driven by the lmstudio planner.
+on:
+  push:
+    branches: [lfm-cloud-run]
+  workflow_dispatch:
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: lfm2.5-2.6b
+            model: hf.co/LiquidAI/LFM2.5-2.6B-GGUF:Q5_K_M
+            extra: --native-tool-calls
+          - name: qwen3.5-9b
+            model: hf.co/unsloth/Qwen3.5-9B-GGUF:Q4_K_M
+            extra: --reasoning-effort none
+    env:
+      OLLAMA_CONTEXT_LENGTH: "8192"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e '.[dev]'
+      - name: Start Ollama and pull model
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          # The installer starts a systemd ollama without our env; stop it so this serve owns the port.
+          sudo systemctl stop ollama || true
+          (ollama serve > ollama.log 2>&1 &)
+          for i in $(seq 1 30); do curl -sf localhost:11434/api/version && break; sleep 2; done
+          ollama pull "${{ matrix.model }}"
+      - name: Smoke check (reply and reasoning length)
+        run: |
+          python - <<'PY'
+          import json, sys, time, urllib.request
+          extra = "${{ matrix.extra }}".split()
+          body = {"model": "${{ matrix.model }}", "temperature": 0, "max_tokens": 1024,
+                  "messages": [{"role": "user", "content": 'Reply with {"ok": true} only.'}]}
+          if "--reasoning-effort" in extra:
+              body["reasoning_effort"] = extra[extra.index("--reasoning-effort") + 1]
+          t = time.time()
+          req = urllib.request.Request("http://localhost:11434/v1/chat/completions", json.dumps(body).encode(),
+                                       {"Content-Type": "application/json"})
+          r = json.load(urllib.request.urlopen(req, timeout=900))
+          m = r["choices"][0]["message"]
+          print("content:", repr(m.get("content"))[:200])
+          print("reasoning chars:", len(m.get("reasoning") or m.get("reasoning_content") or ""))
+          print("usage:", r.get("usage"), "secs:", round(time.time() - t, 1))
+          PY
+      - name: Run both domains
+        run: |
+          mkdir -p results
+          for d in invoice refund; do
+            echo "===== $d"
+            python run_eval.py --domain $d --planner lmstudio --model "${{ matrix.model }}" \
+              --base-url http://localhost:11434/v1 --timeout 900 ${{ matrix.extra }} 2>&1 | tee results/$d.txt
+          done
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-${{ matrix.name }}
+          path: |
+            results/
+            ollama.log

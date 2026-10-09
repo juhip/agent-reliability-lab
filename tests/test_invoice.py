@@ -31,3 +31,11 @@ def test_trace_includes_tool_calls():
     kinds = [e["kind"] for e in out["trace"]["events"]]
     assert kinds.count("tool_call") == 3
     assert kinds.count("tool_result") == 3
+
+def test_pipeline_registry_checks_argument_types_not_just_names():
+    runtime = build_invoice_runtime()
+    result = runtime.tools.call("calculate_variance", {"invoice_amount": "10000", "expected_amount": 10000.0})
+    assert result.ok is False and "must be number" in result.error
+    assert runtime.tools.call("lookup_purchase_order", {"po_id": 1001}).ok is False
+    ok = runtime.tools.call("calculate_variance", {"invoice_amount": 10000, "expected_amount": 10000.0})
+    assert ok.ok and ok.arguments == {"invoice_amount": 10000, "expected_amount": 10000.0}

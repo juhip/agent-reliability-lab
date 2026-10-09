@@ -13,6 +13,8 @@ class ToolResult:
     ok: bool
     output: Any = None
     error: Optional[str] = None
+    # The arguments the tool was called with, so a gate can tell which case a result is about.
+    arguments: Optional[Dict[str, Any]] = None
 
 @dataclass
 class AgentDecision:
@@ -22,6 +24,9 @@ class AgentDecision:
     tool_calls: List[ToolCall] = field(default_factory=list)
     evidence: List[str] = field(default_factory=list)
     final_answer: Optional[Dict[str, Any]] = None
+    # False means "run these tool_calls, then ask me again with the results".
+    # True (the default) keeps the original one-shot behaviour.
+    is_final: bool = True
 
 @dataclass
 class TraceEvent:
