@@ -1,12 +1,35 @@
 """Turn raw model text into an AgentDecision. Small models wrap JSON in fences or prose;
 anything unrecoverable raises ValueError so the caller can retry or fail closed."""
 from __future__ import annotations
+import ast
 import json
 import re
-from typing import Any, Dict
+from typing import Any, Dict, List
 from agent_reliability_lab.types import AgentDecision, ToolCall
 
 _FENCE = re.compile(r"```(?:json)?\s*(.*?)```", re.S | re.I)
+_NATIVE_CALLS = re.compile(r"<\|tool_call_start\|>(.*?)<\|tool_call_end\|>", re.S)
+
+
+def extract_native_tool_calls(text: str) -> List[ToolCall]:
+    """LFM models answer in their trained tool-call format, e.g.
+    <|tool_call_start|>[lookup_po(po_id='PO-1')]<|tool_call_end|>, instead of the requested JSON.
+    Returns the calls, or [] if the text holds none. Only literal keyword arguments are accepted."""
+    calls: List[ToolCall] = []
+    for block in _NATIVE_CALLS.findall(text):
+        try:
+            tree = ast.parse(block.strip(), mode="eval").body
+        except SyntaxError:
+            return []
+        for node in (tree.elts if isinstance(tree, ast.List) else [tree]):
+            if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)) or node.args:
+                return []
+            try:
+                args = {kw.arg: ast.literal_eval(kw.value) for kw in node.keywords}
+            except ValueError:
+                return []
+            calls.append(ToolCall(node.func.id, args))
+    return calls
 
 
 def extract_json_object(text: str) -> Dict[str, Any]:

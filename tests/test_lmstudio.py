@@ -2,7 +2,7 @@ import json
 import pytest
 from agent_reliability_lab.domains.invoice.app import build_invoice_runtime
 from agent_reliability_lab.models.lmstudio import LMStudioDecisionModel
-from agent_reliability_lab.models.parsing import extract_json_object, parse_decision
+from agent_reliability_lab.models.parsing import extract_json_object, extract_native_tool_calls, parse_decision
 
 
 def test_extracts_json_from_fences_prose_and_nested_braces():
@@ -24,9 +24,25 @@ def test_parse_decision_validates_shape():
             parse_decision(bad)
 
 
+def test_extracts_lfm_native_tool_calls_and_rejects_anything_else():
+    calls = extract_native_tool_calls("<|tool_call_start|>[lookup_po(po_id='PO-1'), lookup_receipt(po_id='PO-1')]<|tool_call_end|>")
+    assert [(c.name, c.arguments) for c in calls] == [("lookup_po", {"po_id": "PO-1"}), ("lookup_receipt", {"po_id": "PO-1"})]
+    for bad in ("no calls", "<|tool_call_start|>[lookup_po('PO-1')]<|tool_call_end|>",
+                "<|tool_call_start|>[__import__(name=os.system('x'))]<|tool_call_end|>", "<|tool_call_start|>[oops(<|tool_call_end|>"):
+        assert extract_native_tool_calls(bad) == []
+
+
+def test_native_tool_calls_become_a_lookup_step_only_when_enabled():
+    reply = "<|tool_call_start|>[lookup_po(po_id='PO-1')]<|tool_call_end|>"
+    on = Scripted([reply], native_tool_calls=True).decide({}, {})
+    assert on.is_final is False and on.action == "HUMAN_REVIEW" and on.tool_calls[0].name == "lookup_po"
+    with pytest.raises(ValueError):
+        Scripted([reply, reply]).decide({}, {})
+
+
 class Scripted(LMStudioDecisionModel):
-    def __init__(self, replies):
-        super().__init__("stub")
+    def __init__(self, replies, **kw):
+        super().__init__("stub", **kw)
         self.replies, self.prompts = list(replies), []
 
     def _chat(self, messages):

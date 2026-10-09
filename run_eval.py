@@ -31,7 +31,7 @@ def build_planner(suite, name, args):
     from agent_reliability_lab.models.lmstudio import LMStudioDecisionModel
     return LMStudioDecisionModel(args.model, args.base_url, actions=tuple(suite.DOMAIN.actions),
                                  fail_safe=suite.DOMAIN.fail_safe, max_tokens=args.max_tokens, timeout=args.timeout,
-                                 reasoning_effort=args.reasoning_effort)
+                                 reasoning_effort=args.reasoning_effort, native_tool_calls=args.native_tool_calls)
 
 
 def main(argv=None) -> int:
@@ -42,6 +42,8 @@ def main(argv=None) -> int:
     ap.add_argument("--base-url", default="http://localhost:1234/v1")
     ap.add_argument("--max-tokens", type=int, default=512, help="lmstudio: reply token cap")
     ap.add_argument("--timeout", type=float, default=120.0, help="lmstudio: seconds per model call")
+    ap.add_argument("--native-tool-calls", action="store_true",
+                    help="lmstudio: also accept the model's own tool-call format (LFM <|tool_call_start|>) for lookups")
     ap.add_argument("--reasoning-effort", help="lmstudio: sent as reasoning_effort for thinking models (none, low, ...)")
     ap.add_argument("--effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"],
                     help="Claude effort level")

@@ -5,7 +5,7 @@ from dataclasses import asdict
 from typing import Any, Dict, List, Optional
 from urllib import request
 from agent_reliability_lab.models.base import DecisionModel
-from agent_reliability_lab.models.parsing import extract_json_object, parse_decision
+from agent_reliability_lab.models.parsing import extract_json_object, extract_native_tool_calls, parse_decision
 from agent_reliability_lab.types import AgentDecision, ToolResult
 
 SYSTEM = (
@@ -30,8 +30,9 @@ class LMStudioDecisionModel(DecisionModel):
     def __init__(self, model: str = "local-model", base_url: str = "http://localhost:1234/v1",
                  timeout: float = 120.0, max_retries: int = 1, max_tokens: int = 512,
                  actions: tuple = ("APPROVE", "HUMAN_REVIEW"), fail_safe: str = "HUMAN_REVIEW",
-                 reasoning_effort: Optional[str] = None) -> None:
+                 reasoning_effort: Optional[str] = None, native_tool_calls: bool = False) -> None:
         self.model, self.reasoning_effort = model, reasoning_effort
+        self.native_tool_calls = native_tool_calls
         self.actions, self.fail_safe = tuple(actions), fail_safe
         self.base_url = base_url.rstrip("/")
         self.timeout, self.max_retries, self.max_tokens = timeout, max_retries, max_tokens
@@ -72,6 +73,11 @@ class LMStudioDecisionModel(DecisionModel):
             try:
                 return parse_decision(extract_json_object(text))
             except ValueError as exc:
+                native = extract_native_tool_calls(text) if self.native_tool_calls else []
+                if native:  # a lookup request in the model's own format: run it and ask again
+                    self.stats["native_tool_calls"] = self.stats.get("native_tool_calls", 0) + 1
+                    return AgentDecision(action=self.fail_safe, rationale="native tool call", confidence=0.0,
+                                         tool_calls=native, is_final=False)
                 last_error = exc
                 self.stats["retries"] += 1
                 if len(self.stats["errors"]) < 5:  # keep a few raw replies so a failed run can be diagnosed
