@@ -2,9 +2,9 @@ from __future__ import annotations
 from typing import Dict, Any
 
 PURCHASE_ORDERS = {
-    "PO-1001": {"supplier": "Apex Components", "expected_amount": 10000.0, "currency": "USD", "quantity": 100},
+    "PO-1001": {"supplier": "Northwind Components", "expected_amount": 10000.0, "currency": "USD", "quantity": 100},
     "PO-1002": {"supplier": "Vector Metals", "expected_amount": 7500.0, "currency": "USD", "quantity": 50},
-    "PO-1003": {"supplier": "Apex Components", "expected_amount": 4200.0, "currency": "USD", "quantity": 40},
+    "PO-1003": {"supplier": "Northwind Components", "expected_amount": 4200.0, "currency": "USD", "quantity": 40},
 }
 
 RECEIPTS = {

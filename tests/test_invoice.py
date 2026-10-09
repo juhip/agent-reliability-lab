@@ -27,7 +27,7 @@ def test_planner_failure_fails_closed():
 
 def test_trace_includes_tool_calls():
     runtime = build_invoice_runtime()
-    out = runtime.run({"invoice_id":"INV","po_id":"PO-1001","supplier":"Apex Components","invoice_amount":10000})
+    out = runtime.run({"invoice_id":"INV","po_id":"PO-1001","supplier":"Northwind Components","invoice_amount":10000})
     kinds = [e["kind"] for e in out["trace"]["events"]]
     assert kinds.count("tool_call") == 3
     assert kinds.count("tool_result") == 3

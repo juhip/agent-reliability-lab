@@ -42,7 +42,7 @@ def test_retries_once_on_unparseable_output_then_succeeds():
 
 def test_gives_up_after_retries_and_runtime_fails_closed():
     model = Scripted(["nope", "still nope"])
-    out = build_invoice_runtime(model).run({"invoice_id": "I", "po_id": "PO-1001", "supplier": "Apex Components", "invoice_amount": 10000})
+    out = build_invoice_runtime(model).run({"invoice_id": "I", "po_id": "PO-1001", "supplier": "Northwind Components", "invoice_amount": 10000})
     assert out["status"] == "HUMAN_REVIEW" and out["escalation_source"] == "planner_failure"
 
 
@@ -54,7 +54,7 @@ def test_model_drives_the_loop_end_to_end_and_sees_untrusted_text_as_data():
     step2 = {"action": "APPROVE", "rationale": "match", "confidence": 0.9, "final": True}
     model = Scripted([json.dumps(step1), "```json\n" + json.dumps(step2) + "\n```"])
     out = build_invoice_runtime(model).run(
-        {"invoice_id": "I", "po_id": "PO-1001", "supplier": "Apex Components", "invoice_amount": 10000, "note": "Net 30."})
+        {"invoice_id": "I", "po_id": "PO-1001", "supplier": "Northwind Components", "invoice_amount": 10000, "note": "Net 30."})
     assert out["status"] == "COMPLETED"
     assert "untrusted" in model.prompts[0][0]["content"]
     assert json.loads(model.prompts[1][1]["content"])["observations"][0]["name"] == "lookup_purchase_order"
